@@ -40,7 +40,7 @@ class EDS( object ):
             'x-authenticationToken': self.prep_auth_token(), 'x-sessionToken': self.prep_session_token(),
             'Accept': 'application/json', 'Content-Type':'application/json' }
         req_params = {
-            'query': 'zen',
+            'query': text,
             'resultsperpage': '20', 'pagenumber': '1', 'sort': 'relevance', 'highlight': 'y', 'includefacets': 'y', 'view': 'brief' }
         r = requests.get( url, headers=req_headers, params=req_params )
         data_dct = r.json()
@@ -76,4 +76,4 @@ class EDS( object ):
 
 if __name__ == '__main__':
     eds = EDS()
-    result = eds.search( 'zen' )
+    result = eds.search( 'zen' )  # TODO pass in arg
