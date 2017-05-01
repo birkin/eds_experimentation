@@ -11,7 +11,7 @@ Other useful info:
 (not yet working)
 """
 
-import json, logging, os
+import json, logging, os, pprint
 import requests
 
 
@@ -36,12 +36,16 @@ class EDS( object ):
 
     def search( self, text ):
         url = self.base_url + '/edsapi/publication/Search?query=#{text}&resultsperpage=20&pagenumber=1&sort=relevance&highlight=n&includefacets=y&view=brief&autosuggest=n'
-        headers = {
-            'x-authenticationToken': self.prep_auth_token(), 'x-sessionToken': self.prep_session_token() }
-        r = requests.post( url, headers=headers )
-        output = r.content
-        log.debug( output )
-        return output
+        req_headers = {
+            'x-authenticationToken': self.prep_auth_token(), 'x-sessionToken': self.prep_session_token(),
+            'Accept': 'application/json', 'Content-Type':'application/json' }
+        req_params = {
+            'query': 'zen',
+            'resultsperpage': '20', 'pagenumber': '1', 'sort': 'relevance', 'highlight': 'y', 'includefacets': 'y', 'view': 'brief' }
+        r = requests.get( url, headers=req_headers, params=req_params )
+        data_dct = r.json()
+        log.debug( 'data_dct, ```{}```'.format( pprint.pformat(data_dct) ) )
+        return data_dct
 
     def prep_auth_token( self ):
         if not self.auth_token:
@@ -64,20 +68,8 @@ class EDS( object ):
             r = requests.get( url, headers=req_headers, params=req_params )
             rdct = json.loads( r.content )
             self.session_token = rdct['SessionToken']
-            log.debug( 'session_token, ```{}```'.format(session_token) )
+            log.debug( 'session_token, ```{}```'.format(self.session_token) )
         return self.session_token
-
-    # def prep_session_token( self ):
-    #     if not self.session_token:
-    #         log.debug( 'prepping session_token' )
-    #         url = self.base_url + '/edsapi/rest/CreateSession?profile=#{}&guest=n'.format( self.profile_id )
-    #         log.debug( 'session_token url, ```{}```'.format(url) )
-    #         headers = { 'x-authenticationToken': self.auth_token }
-    #         r = requests.get( url, headers=headers )
-    #         log.debug( 'session_token response, ```{}```'.format(r.content) )
-    #         rdct = json.loads( r.content )
-    #         self.session_token = rdct['SessionToken']
-    #     return self.session_token
 
     # end class EDS()
 
@@ -85,4 +77,3 @@ class EDS( object ):
 if __name__ == '__main__':
     eds = EDS()
     result = eds.search( 'zen' )
-    log.debug( 'result, ```{}```'.format(result) )
