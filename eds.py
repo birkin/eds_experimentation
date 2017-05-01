@@ -2,8 +2,12 @@
 
 """
 Total credit to:
-    - https://github.com/hectorcorrea
-    - https://github.com/Brown-University-Library/bul-search/blob/1b2a8be9cf3d02c90145d43caf5416186ed64ba9/app/models/eds.rb
+    - <https://github.com/hectorcorrea>
+    - <https://github.com/Brown-University-Library/bul-search/blob/1b2a8be9cf3d02c90145d43caf5416186ed64ba9/app/models/eds.rb>
+Other useful info:
+    - <https://eds-api.ebscohost.com/AuthService/rest/help>
+    - <https://eds-api.ebscohost.com/Console>
+    - <http://edswiki.ebscohost.com/EDS_API_Documentation>
 (not yet working)
 """
 
@@ -44,8 +48,10 @@ class EDS( object ):
         if not self.auth_token:
             log.debug( 'prepping auth_token' )
             url = self.base_url + '/authservice/rest/UIDAuth'
+            headers = {'Content-Type':'application/json'}
             data = json.dumps( self.credentials )
-            r = requests.post( url, data=data )
+            log.debug( 'jsn-data, ```{}```'.format(data) )
+            r = requests.post( url, headers=headers, data=data, verify=False )
             log.debug( 'auth_token response, ```{}```'.format(r.content) )
             rdct = json.loads( r.content )
             self.auth_token = rdct['AuthToken']
