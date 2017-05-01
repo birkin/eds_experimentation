@@ -48,10 +48,10 @@ class EDS( object ):
         if not self.auth_token:
             log.debug( 'prepping auth_token' )
             url = self.base_url + '/authservice/rest/UIDAuth'
-            headers = {'Content-Type':'application/json'}
+            headers = { 'Accept': 'application/json', 'Content-Type':'application/json'}
             data = json.dumps( self.credentials )
             log.debug( 'jsn-data, ```{}```'.format(data) )
-            r = requests.post( url, headers=headers, data=data, verify=False )
+            r = requests.post( url, headers=headers, data=data )
             log.debug( 'auth_token response, ```{}```'.format(r.content) )
             rdct = json.loads( r.content )
             self.auth_token = rdct['AuthToken']
