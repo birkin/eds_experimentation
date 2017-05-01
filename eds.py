@@ -26,7 +26,7 @@ class EDS( object ):
     def __init__( self ):
         self.base_url = 'https://eds-api.ebscohost.com'
         self.profile_id = os.environ['EDS_PROFILE_ID']
-        self.credentials = {
+        self.auth_credentials = {
             'UserId': os.environ['EDS_USER_ID'],
             'Password': os.environ['EDS_PASSWORD'],
             'InterfaceId': self.profile_id }
@@ -44,29 +44,40 @@ class EDS( object ):
         return output
 
     def prep_auth_token( self ):
-        # TODO: make sure the token still is valid (via AuthTimeout in response)
         if not self.auth_token:
-            log.debug( 'prepping auth_token' )
             url = self.base_url + '/authservice/rest/UIDAuth'
-            headers = { 'Accept': 'application/json', 'Content-Type':'application/json'}
-            data = json.dumps( self.credentials )
-            log.debug( 'jsn-data, ```{}```'.format(data) )
-            r = requests.post( url, headers=headers, data=data )
-            log.debug( 'auth_token response, ```{}```'.format(r.content) )
+            req_headers = { 'Accept': 'application/json', 'Content-Type':'application/json' }
+            req_data = json.dumps( self.auth_credentials )
+            r = requests.post( url, headers=req_headers, data=req_data )
             rdct = json.loads( r.content )
             self.auth_token = rdct['AuthToken']
             self.auth_timeout = rdct['AuthTimeout']
+            log.debug( 'self.auth_token, ```{tkn}```; self.auth_timeout, ```{tmt}```'.format( tkn=self.auth_token, tmt=self.auth_timeout ) )
         return self.auth_token
 
     def prep_session_token( self ):
         if not self.session_token:
             log.debug( 'prepping session_token' )
-            url = self.base_url + '/edsapi/rest/CreateSession?profile=#{@profile_id}&guest=n'
-            headers = { 'x-authenticationToken': self.auth_token() }
-            r = requests.get( url, headers=headers )
+            url = self.base_url + '/edsapi/rest/CreateSession'
+            req_headers = { 'x-authenticationToken': self.auth_token, 'Accept': 'application/json', 'Content-Type':'application/json' }
+            req_params = { 'profile': self.profile_id, 'guest': 'n' }
+            r = requests.get( url, headers=req_headers, params=req_params )
             rdct = json.loads( r.content )
             self.session_token = rdct['SessionToken']
+            log.debug( 'session_token, ```{}```'.format(session_token) )
         return self.session_token
+
+    # def prep_session_token( self ):
+    #     if not self.session_token:
+    #         log.debug( 'prepping session_token' )
+    #         url = self.base_url + '/edsapi/rest/CreateSession?profile=#{}&guest=n'.format( self.profile_id )
+    #         log.debug( 'session_token url, ```{}```'.format(url) )
+    #         headers = { 'x-authenticationToken': self.auth_token }
+    #         r = requests.get( url, headers=headers )
+    #         log.debug( 'session_token response, ```{}```'.format(r.content) )
+    #         rdct = json.loads( r.content )
+    #         self.session_token = rdct['SessionToken']
+    #     return self.session_token
 
     # end class EDS()
 
