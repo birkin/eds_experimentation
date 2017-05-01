@@ -46,6 +46,7 @@ class EDS( object ):
             url = self.base_url + '/authservice/rest/UIDAuth'
             data = json.dumps( self.credentials )
             r = requests.post( url, data=data )
+            log.debug( 'auth_token response, ```{}```'.format(r.content) )
             rdct = json.loads( r.content )
             self.auth_token = rdct['AuthToken']
             self.auth_timeout = rdct['AuthTimeout']
@@ -62,3 +63,9 @@ class EDS( object ):
         return self.session_token
 
     # end class EDS()
+
+
+if __name__ == '__main__':
+    eds = EDS()
+    result = eds.search( 'zen' )
+    log.debug( 'result, ```{}```'.format(result) )
