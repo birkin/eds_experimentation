@@ -10,6 +10,11 @@ Other useful info:
     - <https://eds-api.ebscohost.com/AuthService/rest/help>
     - <https://eds-api.ebscohost.com/Console>
     - <http://edswiki.ebscohost.com/EDS_API_Documentation>
+
+Usage:
+    $ source ../env/bin/activate  # loads environmental variables
+    >>> eds = EDS()
+    >>> result = eds.search( 'zen' )
 """
 
 import json, logging, os, pprint
@@ -36,19 +41,32 @@ class EDS( object ):
         self.session_token = None
 
     def search( self, text ):
+        """ Handles authentication if necessary, then runs search. """
         url = self.base_url + '/edsapi/publication/Search?query=#{text}&resultsperpage=20&pagenumber=1&sort=relevance&highlight=n&includefacets=y&view=brief&autosuggest=n'
-        req_headers = {
-            'x-authenticationToken': self.prep_auth_token(), 'x-sessionToken': self.prep_session_token(),
-            'Accept': 'application/json', 'Content-Type':'application/json' }
-        req_params = {
-            'query': text,
-            'resultsperpage': '20', 'pagenumber': '1', 'sort': 'relevance', 'highlight': 'y', 'includefacets': 'y', 'view': 'brief' }
+        req_headers = self.prep_headers()
+        req_params = self.prep_params( text )
         r = requests.get( url, headers=req_headers, params=req_params )
         data_dct = r.json()
-        log.debug( 'data_dct, ```{}```'.format( pprint.pformat(data_dct) ) )
+        log.debug( 'data_dct, ```%s```' % pprint.pformat(data_dct) )
+        ## TODO: run some asserts on top and second-level keys for mini-documentation
         return data_dct
 
+    ## header prep ###
+
+    def prep_headers( self ):
+        """ Handles authentication, and session instantiation, if necessary.
+            Called by search() """
+        req_headers = {
+            'x-authenticationToken': self.prep_auth_token(),
+            'x-sessionToken': self.prep_session_token(),
+            'Accept': 'application/json',
+            'Content-Type':'application/json' }
+        log.debug( 'req_headers, ```%s```' % pprint.pformat(req_headers) )
+        return req_headers
+
     def prep_auth_token( self ):
+        """ Handles authentication if necessary.
+            Called by prep_headers() """
         if not self.auth_token:
             url = self.base_url + '/authservice/rest/UIDAuth'
             req_headers = { 'Accept': 'application/json', 'Content-Type':'application/json' }
@@ -61,6 +79,8 @@ class EDS( object ):
         return self.auth_token
 
     def prep_session_token( self ):
+        """ Handles session-instantiation if necessary.
+            Called by prep_headers() """
         if not self.session_token:
             log.debug( 'prepping session_token' )
             url = self.base_url + '/edsapi/rest/CreateSession'
@@ -69,8 +89,24 @@ class EDS( object ):
             r = requests.get( url, headers=req_headers, params=req_params )
             rdct = json.loads( r.content )
             self.session_token = rdct['SessionToken']
-            log.debug( 'session_token, ```{}```'.format(self.session_token) )
+            log.debug( 'session_token, ```%s```' % self.session_token )
         return self.session_token
+
+    ## params prep ###
+
+    def prep_params( self, text ):
+        """ Preps rudimentary demo params.
+            Called by search() """
+        req_params = {
+            'query': text,
+            'resultsperpage': '20',
+            'pagenumber': '1',
+            'sort': 'relevance',
+            'highlight': 'y',
+            'includefacets': 'y',
+            'view': 'brief' }
+        log.debug( 'req_params, ```%s```' % pprint.pformat(req_params) )
+        return req_params
 
     # end class EDS()
 
