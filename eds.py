@@ -113,4 +113,4 @@ class EDS( object ):
 
 if __name__ == '__main__':
     eds = EDS()
-    result = eds.search( 'zen' )  # TODO pass in arg
+    result = eds.search( 'zen' )
