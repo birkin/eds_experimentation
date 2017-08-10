@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 
 """
+python3 demo-code to connect to eds-api
+
 Total credit to:
     - <https://github.com/hectorcorrea>
     - <https://github.com/Brown-University-Library/bul-search/blob/1b2a8be9cf3d02c90145d43caf5416186ed64ba9/app/models/eds.rb>
@@ -8,7 +10,6 @@ Other useful info:
     - <https://eds-api.ebscohost.com/AuthService/rest/help>
     - <https://eds-api.ebscohost.com/Console>
     - <http://edswiki.ebscohost.com/EDS_API_Documentation>
-(not yet working)
 """
 
 import json, logging, os, pprint
